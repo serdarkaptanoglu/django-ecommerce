@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from . models import Product, Category
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from . forms import SignUpForm, UpdateUserForm
+from . forms import SignUpForm, UpdateUserForm, ChangePasswordForm
 from django.contrib.auth.models import User
 
 
@@ -78,7 +78,6 @@ def category_summary(request):
 
 
 def update_user(request):
-    form = UpdateUserForm()
     if request.user.is_authenticated:
         current_user = User.objects.get(id=request.user.id)
         user_form = UpdateUserForm(request.POST or None, instance=current_user)
@@ -92,3 +91,23 @@ def update_user(request):
         messages.success(request, "Giris yapmalisiniz...")
         return redirect('home')
 
+
+def update_password(request):
+    if request.user.is_authenticated:
+        current_user = request.user
+        if request.method == 'POST':
+            form = ChangePasswordForm(current_user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Parola Degistirildi...')
+                login(request, current_user)
+                return redirect('update_user')
+            else:
+                for error in list(form.errors.values()):
+                    messages.info(request, error)
+                    return redirect('update_password')
+        else:
+            form = ChangePasswordForm(current_user)
+            return render(request, 'update_password.html', {'form': form})
+    else:
+        messages.info(request, 'Giris Yapmalisiniz...')

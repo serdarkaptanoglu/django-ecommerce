@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from . forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoFrom
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 def home(request):
@@ -125,3 +126,16 @@ def update_info(request):
     else:
         messages.success(request, "Giris yapmalisiniz...")
         return redirect('home')
+
+
+def search(request):
+    if request.method == 'POST':
+        searched = request.POST['searched']
+        searched = Product.objects.filter(Q(name__icontains=searched) | Q(description__icontains=searched))
+        if not searched:
+            messages.info(request, 'Boyle Bir Urun Yoktur...')
+            return render(request, 'search.html')
+        else:
+            return render(request, 'search.html', {'searched': searched})
+    else:
+        return render(request, 'search.html', {})

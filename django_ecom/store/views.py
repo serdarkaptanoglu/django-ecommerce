@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from . models import Product, Category
+from . models import Product, Category, Profile
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from . forms import SignUpForm, UpdateUserForm, ChangePasswordForm
+from . forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoFrom
 from django.contrib.auth.models import User
 
 
@@ -48,7 +48,7 @@ def register_user(request):
             user = authenticate(request, username=username, password=password)
             login(request, user)
             messages.success(request, "Başarıyla Kayıt Oldunuz...")
-            return redirect('home')
+            return redirect('update_info')
         else:
             messages.info(request, "Hatalı bir işlem yaptınız...")
             return redirect('register')
@@ -111,3 +111,17 @@ def update_password(request):
             return render(request, 'update_password.html', {'form': form})
     else:
         messages.info(request, 'Giris Yapmalisiniz...')
+
+
+def update_info(request):
+    if request.user.is_authenticated:
+        current_user = Profile.objects.get(user__id=request.user.id)
+        form = UserInfoFrom(request.POST or None, instance=current_user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Kullanıcı bilgileri güncellendi..")
+            return redirect('update_info')
+        return render(request, 'update_info.html', {'form': form})
+    else:
+        messages.success(request, "Giris yapmalisiniz...")
+        return redirect('home')

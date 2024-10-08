@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 import json
 from cart.cart import Cart
+from payment.forms import ShippingForm
+from payment.models import ShippingAddress
 
 
 def home(request):
@@ -127,12 +129,15 @@ def update_password(request):
 def update_info(request):
     if request.user.is_authenticated:
         current_user = Profile.objects.get(user__id=request.user.id)
+        shipping_user = ShippingAddress.objects.get(user__id=request.user.id)
         form = UserInfoFrom(request.POST or None, instance=current_user)
-        if form.is_valid():
+        shipping_form = ShippingForm(request.POST or None, instance=shipping_user)
+        if form.is_valid() or shipping_form.is_valid():
             form.save()
+            shipping_form.save()
             messages.success(request, "Kullanıcı bilgileri güncellendi..")
             return redirect('update_info')
-        return render(request, 'update_info.html', {'form': form})
+        return render(request, 'update_info.html', {'form': form, 'shipping_form': shipping_form})
     else:
         messages.success(request, "Giris yapmalisiniz...")
         return redirect('home')

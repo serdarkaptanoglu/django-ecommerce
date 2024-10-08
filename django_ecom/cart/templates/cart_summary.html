@@ -66,7 +66,10 @@
                             </div>
                 {% endfor %}
             <br/>
-            <h3>Total : ${{ totals }}</h3>
+            <div align="right">
+                <h3>Total : ${{ totals }}</h3>
+                <a href="{% url 'checkout' %}" class="btn btn-secondary " >Checkout</a>
+            </div>
             {% else %}
                 Sepetiniz Bos
             {% endif %}

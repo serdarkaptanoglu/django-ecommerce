@@ -6,6 +6,24 @@ from django.contrib import messages
 from store.models import Product
 
 
+def shipped_dash(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        orders = Order.objects.filter(shipped=True)
+        return render(request, "payment/shipped_dash.html", {"orders": orders})
+    else:
+        messages.info(request, "Erisim Reddildi...")
+        return redirect("home")
+
+
+def unshipped_dash(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        orders = Order.objects.filter(shipped=False)
+        return render(request, "payment/unshipped_dash.html", {"orders": orders})
+    else:
+        messages.info(request, "Erisim Reddildi...")
+        return redirect("home")
+
+
 def process_order(request):
     if request.POST:
         cart = Cart(request)
